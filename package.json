@@ -1,0 +1,26 @@
+{
+  "name": "chgk-db-search",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emirotin/chgk-db-search.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emirotin/chgk-db-search/issues"
+  },
+  "homepage": "https://github.com/emirotin/chgk-db-search#readme",
+  "devDependencies": {
+    "prettier": "^1.7.4"
+  },
+  "prettier": {
+    "tabWidth": 2
+  }
+}

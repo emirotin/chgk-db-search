@@ -1,0 +1,19 @@
+{
+  "name": "chgk-db-spider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "promise-queue": "^2.2.3",
+    "request": "^2.83.0",
+    "ssl-root-cas": "^1.2.4",
+    "xml2json": "^0.11.0"
+  }
+}
