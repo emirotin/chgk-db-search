@@ -11,16 +11,10 @@ pids
 *.seed
 *.pid.lock
 
-# node-waf configuration
-.lock-wscript
-
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 
 node_modules
-
-# Typescript v1 declaration files
-typings/
 
 # Optional npm cache directory
 .npm
@@ -39,4 +33,6 @@ typings/
 
 # dotenv environment variables file
 .env
+
+.DS_Store
 
