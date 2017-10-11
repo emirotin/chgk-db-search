@@ -7,7 +7,7 @@ const xml2json = require("xml2json");
 const Queue = require("promise-queue");
 Queue.configure(Promise);
 
-const { TournamentsManager } = require("./db");
+const { DbManager } = require("./db");
 
 const MAX_CONCURRENT_FETCHES = 100;
 
@@ -18,7 +18,7 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const fetchQueue = new Queue(MAX_CONCURRENT_FETCHES, Infinity);
 
-  const tournamentsManager = TournamentsManager();
+  const dbManager = DbManager();
 
   const realFetchUrl = n =>
     request(getUrl(n), {
@@ -31,28 +31,48 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
       })
     );
 
-  const fetchChildren = (node, level) => {
-    let { tour } = node;
+  const fetchChildren = data => {
+    let { tour } = data;
     if (!tour) return;
     if (!Array.isArray(tour)) {
       tour = [tour];
     }
-    return Promise.map(tour, tour => fetchUrl(tour.Id, level + 1));
+
+    return Promise.map(tour, tour => fetchUrl(tour.Id));
   };
 
-  const fetchUrl = (n, level = 0) =>
+  const upsertQuestions = (trx, data, tournamentId) => {
+    let { question } = data;
+    if (!question) return;
+    if (!Array.isArray(question)) {
+      question = [question];
+    }
+
+    return Promise.map(question, question =>
+      dbManager.upsertQuestion(trx, tournamentId, question)
+    );
+  };
+
+  const fetchUrl = (trx, n) =>
     fetchQueue
       .add(() =>
         Promise.delay(1000 * Math.random()).then(() => realFetchUrl(n))
       )
-      .then(({ tournament: data }) => {
-        return Promise.all([
-          tournamentsManager.upsertTournament(data),
-          fetchChildren(data, level)
-        ]);
-      });
+      .then(({ tournament: data }) =>
+        dbManager.upsertTournament(trx, data).then(tournamentId =>
+          Promise.all([
+            fetchChildren(data)
+            //upsertQuestions(trx, data, tournamentId)
+          ])
+        )
+      );
 
-  const fetchDb = () => fetchUrl(0);
+  const fetchDb = () =>
+    dbManager
+      .run()
+      .then(trx => fetchUrl(trx, 0))
+      .then(dbManager.commit)
+      .catch(dbManager.rollback);
 
   return { fetchDb };
 };
