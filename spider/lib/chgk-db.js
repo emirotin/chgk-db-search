@@ -31,17 +31,17 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
       })
     );
 
-  const fetchChildren = data => {
+  const fetchChildren = (data, parentId) => {
     let { tour } = data;
     if (!tour) return;
     if (!Array.isArray(tour)) {
       tour = [tour];
     }
 
-    return Promise.map(tour, tour => fetchUrl(tour.Id));
+    return Promise.map(tour, tour => fetchUrl(tour.Id, parentId));
   };
 
-  const upsertQuestions = (trx, data, tournamentId) => {
+  const upsertQuestions = (data, tournamentId) => {
     let { question } = data;
     if (!question) return;
     if (!Array.isArray(question)) {
@@ -49,30 +49,27 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
     }
 
     return Promise.map(question, question =>
-      dbManager.upsertQuestion(trx, tournamentId, question)
+      dbManager.upsertQuestion(tournamentId, question)
     );
   };
 
-  const fetchUrl = (trx, n) =>
-    fetchQueue
+  const fetchUrl = (n, parentId) => {
+    console.log(`Fetching tour #${n}`);
+    return fetchQueue
       .add(() =>
         Promise.delay(1000 * Math.random()).then(() => realFetchUrl(n))
       )
       .then(({ tournament: data }) =>
-        dbManager.upsertTournament(trx, data).then(tournamentId =>
+        dbManager.upsertTournament(data, parentId).then(tournamentId =>
           Promise.all([
-            fetchChildren(data)
-            //upsertQuestions(trx, data, tournamentId)
+            //upsertQuestions(data, tournamentId),
+            fetchChildren(data, tournamentId)
           ])
         )
       );
+  };
 
-  const fetchDb = () =>
-    dbManager
-      .run()
-      .then(trx => fetchUrl(trx, 0))
-      .then(dbManager.commit)
-      .catch(dbManager.rollback);
+  const fetchDb = () => dbManager.run(() => fetchUrl(0));
 
   return { fetchDb };
 };

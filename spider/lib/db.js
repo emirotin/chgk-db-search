@@ -3,6 +3,7 @@ const env = process.env.NODE_ENV || "development";
 const isDev = env === "development";
 const config = require("../knexfile")[env];
 const knex = require("knex");
+const { parseInt } = require("lodash");
 
 const defaultForEmptyObj = (o, d) => {
   if (!o) return d;
@@ -11,9 +12,16 @@ const defaultForEmptyObj = (o, d) => {
   return o;
 };
 
+const getTable = ({ db, trx, tableName }) => {
+  const t = db(tableName);
+  if (trx) {
+    return t.transacting(trx);
+  }
+  return t;
+};
+
 const findKey = ({ db, trx, tableName, whereFields, keyField = "id" }) =>
-  db(tableName)
-    .transacting(trx)
+  getTable({ db, trx, tableName })
     .select(keyField)
     .where(whereFields)
     .get(0)
@@ -52,13 +60,11 @@ const insertOrUpdate = ({
   keyField = "id"
 }) => {
   if (!key) {
-    return db(tableName)
-      .transacting(trx)
+    return getTable({ db, trx, tableName })
       .insert(Object.assign({}, updateFields, extraInsertFields))
       .get(0);
   } else {
-    return db(tableName)
-      .transacting(trx)
+    return getTable({ db, trx, tableName })
       .where(keyField, key)
       .update(updateFields)
       .thenReturn(key);
@@ -71,15 +77,6 @@ const DbManager = () => {
   );
 
   let currentTrx = null;
-
-  const run = () => {
-    if (currentTrx) {
-      throw new Error("Transaction already in progress!");
-    }
-    return db.transaction(trx => {
-      return (currentTrx = trx);
-    });
-  };
 
   const commit = () => {
     if (!currentTrx) {
@@ -95,10 +92,26 @@ const DbManager = () => {
     return currentTrx.commit();
   };
 
-  const upsertTournament = (trx, data) => {
+  const run = fn => {
+    if (currentTrx) {
+      throw new Error("Transaction already in progress!");
+    }
+    return db.transaction(trx => {
+      currentTrx = trx;
+      return Promise.resolve(fn(trx))
+        .then(commit)
+        .catch(rollback);
+    });
+  };
+
+  const upsertTournament = (data, parentId = null) => {
     const dbId = parseInt(data.Id);
+
+    console.log(`Upsert tour #${dbId}`);
+
     const newRecord = {
       dbId,
+      parentId,
       parentDbId: parseInt(data.ParentId || 0),
       title: dbId === 0 ? "<корень>" : data.Title || "?",
       dbTextId: data.TextId || "",
@@ -107,40 +120,22 @@ const DbManager = () => {
       dbUpdatedAt: data.LastUpdated ? new Date(data.LastUpdated) : null
     };
 
-    const parentId = newRecord.parentDbId
-      ? findTouramentId({
-          db,
-          trx,
-          whereFields: { dbId: newRecord.parentDbId }
-        })
-      : null;
-
-    const existingRecordId = findTouramentId({
+    return upsert({
       db,
-      trx,
-      whereFields: { dbId }
-    });
-
-    return Promise.join(
-      parentId,
-      existingRecordId,
-      (parentId, existingRecordId) => {
-        return insertOrUpdate({
-          db,
-          trx,
-          tableName: "tournaments",
-          key: existingRecordId,
-          updateFields: Object.assign(newRecord, { parentId })
-        });
-      }
-    ).catch(e => {
+      trx: currentTrx,
+      tableName: "tournaments",
+      whereFields: { dbId },
+      dataFields: newRecord
+    }).catch(e => {
       console.error(e);
       throw e;
     });
   };
 
-  const upsertQuestion = (trx, data, tournamentId) => {
+  const upsertQuestion = (data, tournamentId) => {
     const dbId = parseInt(data.Id);
+
+    console.log(`Upsert question #${dbId}`);
 
     const newRecord = {
       dbId,
@@ -159,14 +154,14 @@ const DbManager = () => {
 
     return upsert({
       db,
-      trx,
+      trx: currentTrx,
       tableName: "questions",
       whereFields: { dbId },
       dataFields: newRecord
     });
   };
 
-  return { upsertTournament, upsertQuestion, run, commit, rollback };
+  return { upsertTournament, upsertQuestion, run };
 };
 
 exports.DbManager = DbManager;
