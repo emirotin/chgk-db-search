@@ -15,7 +15,7 @@ exports.up = (knex, Promise) => {
 
       table.string("title");
 
-      table.boolean("outdated").nullable();
+      table.boolean("obsolete").nullable();
       table.timestamp("dbCreatedAt").nullable();
       table.timestamp("dbUpdatedAt").nullable();
       table.timestamp("lastSpideredAt").nullable();
@@ -39,7 +39,7 @@ exports.up = (knex, Promise) => {
       table.string("authors");
       table.string("sources");
 
-      table.boolean("outdated").nullable();
+      table.boolean("obsolete").nullable();
 
       table.unique(["dbId"]);
     });

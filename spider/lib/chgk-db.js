@@ -52,6 +52,7 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const fetchUrl = (n, parentId) => {
     console.log(`Fetching tour #${n}`);
+
     return fetchQueue
       .add(() =>
         Promise.delay(1000 * Math.random()).then(() => realFetchUrl(n))
@@ -68,7 +69,8 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
       );
   };
 
-  const fetchDb = () => dbManager.run(() => fetchUrl(0));
+  const fetchDb = () =>
+    dbManager.run(() => dbManager.markAllObsolete().then(() => fetchUrl(0)));
 
   return { fetchDb };
 };

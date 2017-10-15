@@ -103,6 +103,16 @@ const DbManager = () => {
     });
   };
 
+  const markAllObsolete = () =>
+    Promise.all([
+      getTable({ db, trx: currentTrx, tableName: "tournaments" }).update({
+        obsolete: 1
+      }),
+      getTable({ db, trx: currentTrx, tableName: "questions" }).update({
+        obsolete: 1
+      })
+    ]);
+
   const upsertTournament = (data, parentId = null) => {
     const dbId = parseInt(data.Id);
 
@@ -116,7 +126,10 @@ const DbManager = () => {
       dbTextId: data.TextId || "",
       number: defaultForEmptyObj(data.Number),
       dbCreatedAt: data.CreatedAt ? new Date(data.CreatedAt) : null,
-      dbUpdatedAt: data.LastUpdated ? new Date(data.LastUpdated) : null
+      dbUpdatedAt: data.LastUpdated ? new Date(data.LastUpdated) : null,
+
+      lastSpideredAt: new Date(),
+      obsolete: null
     };
 
     return upsert({
@@ -148,7 +161,9 @@ const DbManager = () => {
       altAnswers: defaultForEmptyObj(data.PassCriteria),
       comments: defaultForEmptyObj(data.Comments, ""),
       authors: defaultForEmptyObj(data.Authors, ""),
-      sources: defaultForEmptyObj(data.Sources, "")
+      sources: defaultForEmptyObj(data.Sources, ""),
+
+      obsolete: null
     };
 
     return upsert({
@@ -160,7 +175,7 @@ const DbManager = () => {
     });
   };
 
-  return { upsertTournament, upsertQuestion, run };
+  return { upsertTournament, upsertQuestion, markAllObsolete, run };
 };
 
 exports.DbManager = DbManager;
