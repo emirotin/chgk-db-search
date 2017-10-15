@@ -1,6 +1,3 @@
-const rootCas = require("ssl-root-cas").create();
-require("https").globalAgent.options.ca = rootCas;
-
 const Promise = require("bluebird");
 const request = require("request-promise");
 const xml2json = require("xml2json");
@@ -10,11 +7,12 @@ Queue.configure(Promise);
 const { DbManager } = require("./db");
 
 const MAX_CONCURRENT_FETCHES = 100;
+const MAX_CONNECTIONS = 10;
 
 const getUrl = n => `https://db.chgk.info/tour/${n}/xml`;
 
 const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
-  const requestPool = { maxSockets: 10 };
+  const requestPool = { maxSockets: MAX_CONNECTIONS };
 
   const fetchQueue = new Queue(MAX_CONCURRENT_FETCHES, Infinity);
 
@@ -22,7 +20,6 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const realFetchUrl = n =>
     request(getUrl(n), {
-      strictSSL: false,
       pool: requestPool
     }).then(body =>
       xml2json.toJson(body, {
@@ -49,7 +46,7 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
     }
 
     return Promise.map(question, question =>
-      dbManager.upsertQuestion(tournamentId, question)
+      dbManager.upsertQuestion(question, tournamentId)
     );
   };
 
@@ -60,12 +57,14 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
         Promise.delay(1000 * Math.random()).then(() => realFetchUrl(n))
       )
       .then(({ tournament: data }) =>
-        dbManager.upsertTournament(data, parentId).then(tournamentId =>
-          Promise.all([
-            //upsertQuestions(data, tournamentId),
-            fetchChildren(data, tournamentId)
-          ])
-        )
+        dbManager
+          .upsertTournament(data, parentId)
+          .then(tournamentId =>
+            Promise.all([
+              upsertQuestions(data, tournamentId),
+              fetchChildren(data, tournamentId)
+            ])
+          )
       );
   };
 

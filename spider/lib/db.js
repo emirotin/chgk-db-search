@@ -5,10 +5,9 @@ const config = require("../knexfile")[env];
 const knex = require("knex");
 const { parseInt } = require("lodash");
 
-const defaultForEmptyObj = (o, d) => {
+const defaultForEmptyObj = (o, d = null) => {
   if (!o) return d;
-  if (typeof o !== "object") return d;
-  if (!Object.keys(o).length) return d;
+  if (typeof o === "object" && !Object.keys(o).length) return d;
   return o;
 };
 
@@ -133,7 +132,7 @@ const DbManager = () => {
   };
 
   const upsertQuestion = (data, tournamentId) => {
-    const dbId = parseInt(data.Id);
+    const dbId = parseInt(data.QuestionId);
 
     console.log(`Upsert question #${dbId}`);
 
@@ -141,15 +140,15 @@ const DbManager = () => {
       dbId,
       tournamentDbId: parseInt(data.ParentId),
       tournamentId,
-      dbTextId: data.TextId || "",
+      dbTextId: defaultForEmptyObj(data.TextId, ""),
       number: defaultForEmptyObj(data.Number),
 
-      question: data.Question || "",
-      answer: data.Answer || "",
-      altAnswers: data.PassCriteria || "",
-      comments: data.Comments || "",
-      authors: data.Authors || "",
-      sources: data.Sources || ""
+      question: defaultForEmptyObj(data.Question, ""),
+      answer: defaultForEmptyObj(data.Answer, ""),
+      altAnswers: defaultForEmptyObj(data.PassCriteria),
+      comments: defaultForEmptyObj(data.Comments, ""),
+      authors: defaultForEmptyObj(data.Authors, ""),
+      sources: defaultForEmptyObj(data.Sources, "")
     };
 
     return upsert({
