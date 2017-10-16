@@ -1,24 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 const Promise = require("bluebird");
+const JSONStream = require("JSONStream");
 
 const lunr = require("lunr");
 require("lunr-languages/lunr.stemmer.support")(lunr);
 require("lunr-languages/lunr.ru")(lunr);
 require("lunr-languages/lunr.multi")(lunr);
 
-const { DbManager } = require("./lib/db");
-
-const dbManager = DbManager();
-
-const BATCH_SIZE = 1000;
+const DUMP_NAME = "db-dump.json";
 const INDEX_NAME = "db-index.json";
-
-const getBatch = n =>
-  dbManager
-    .getQuestions()
-    .offset(n * BATCH_SIZE)
-    .limit(BATCH_SIZE);
 
 const indexBuilder = new lunr.Builder();
 
@@ -34,29 +25,21 @@ indexBuilder.ref("id");
 
 indexBuilder.metadataWhitelist = ["position"];
 
-const processBatch = n =>
-  getBatch(n).then(docs => {
-    if (!docs || !docs.length) {
-      return false;
-    }
-    docs.forEach(doc => indexBuilder.add(doc));
-    return true;
-  });
+const stream = JSONStream.parse("docs.*");
 
-const run = () => {
-  let n = 0;
-  const runInner = prevResult => {
-    if (prevResult === false) {
-      return Promise.resolve();
-    }
-    console.log(`Process batch #${n}`);
-    return processBatch(n++).then(runInner);
-  };
-  return runInner().then(() => indexBuilder.build());
-};
+let i = 0;
+stream.on("data", doc => {
+  indexBuilder.add(doc);
+  i++;
+  if (!(i % 1000)) {
+    console.log(`Processed ${i} entries`);
+  }
+});
 
-run()
-  .then(index => {
-    fs.writeFileSync(path.join(__dirname, INDEX_NAME), JSON.stringify(index));
-  })
-  .then(() => process.exit(0));
+stream.on("end", () => {
+  const index = indexBuilder.build();
+
+  fs.writeFileSync(path.join(__dirname, INDEX_NAME), JSON.stringify(index));
+});
+
+fs.createReadStream(path.join(__dirname, DUMP_NAME)).pipe(stream);
