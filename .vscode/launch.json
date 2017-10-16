@@ -10,7 +10,7 @@
       "protocol": "inspector",
       "name": "Launch Program",
       "cwd": "${workspaceFolder}/spider",
-      "program": "${workspaceFolder}/spider/spider.js"
+      "program": "${workspaceFolder}/spider/build-index.js"
     }
   ]
 }

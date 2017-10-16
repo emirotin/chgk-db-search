@@ -175,7 +175,16 @@ const DbManager = () => {
     });
   };
 
-  return { upsertTournament, upsertQuestion, markAllObsolete, run };
+  const getQuestions = () =>
+    getTable({ db, tableName: "questions" }).whereNull("obsolete");
+
+  return {
+    upsertTournament,
+    upsertQuestion,
+    markAllObsolete,
+    getQuestions,
+    run
+  };
 };
 
 exports.DbManager = DbManager;
