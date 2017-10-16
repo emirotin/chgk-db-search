@@ -20,23 +20,19 @@ const getBatch = n =>
     .offset(n * BATCH_SIZE)
     .limit(BATCH_SIZE);
 
-let indexBuilder;
+const indexBuilder = new lunr.Builder();
 
-const index = lunr(function() {
-  this.use(lunr.multiLanguage("en", "ru"));
+indexBuilder.use(lunr.multiLanguage("en", "ru"));
 
-  this.field("question");
-  this.field("answer");
-  this.field("altAnswers");
-  this.field("comments");
-  this.field("authors");
-  this.field("sources");
-  this.ref("id");
+indexBuilder.field("question");
+indexBuilder.field("answer");
+indexBuilder.field("altAnswers");
+indexBuilder.field("comments");
+indexBuilder.field("authors");
+indexBuilder.field("sources");
+indexBuilder.ref("id");
 
-  this.metadataWhitelist = ["position"];
-
-  indexBuilder = this;
-});
+indexBuilder.metadataWhitelist = ["position"];
 
 const processBatch = n =>
   getBatch(n).then(docs => {
@@ -56,11 +52,11 @@ const run = () => {
     console.log(`Process batch #${n}`);
     return processBatch(n++).then(runInner);
   };
-  return runInner();
+  return runInner().then(() => indexBuilder.build());
 };
 
 run()
-  .then(() => {
+  .then(index => {
     fs.writeFileSync(path.join(__dirname, INDEX_NAME), JSON.stringify(index));
   })
   .then(() => process.exit(0));
