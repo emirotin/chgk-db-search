@@ -1,9 +1,11 @@
+const path = require("path");
 const Promise = require("bluebird");
 const env = process.env.NODE_ENV || "development";
 const isDev = env === "development";
 const config = require("../knexfile")[env];
 const knex = require("knex");
 const { parseInt } = require("lodash");
+const sqlite = require("sqlite3");
 
 const defaultForEmptyObj = (o, d = null) => {
   if (!o) return d;
@@ -175,15 +177,62 @@ const DbManager = () => {
     });
   };
 
-  const getQuestions = () =>
-    getTable({ db, tableName: "questions" }).whereNull("obsolete");
+  const loadStemmerExt = () =>
+    db.client.acquireConnection().then(sqlite =>
+      new Promise((resolve, reject) => {
+        sqlite.loadExtension(
+          path.join(__dirname, "..", "fts5stemmer.dylib"),
+          err => {
+            if (err) {
+              return reject(err);
+            }
+            resolve();
+          }
+        );
+      }).thenReturn(sqlite)
+    );
+
+  const questionContentsColumns = [
+    "question",
+    "answer",
+    "altAnswers",
+    "comments",
+    "authors",
+    "sources"
+  ].join(", ");
+
+  const createSearchQuery = [
+    "CREATE VIRTUAL TABLE",
+    "search",
+    "USING",
+    `fts5(${questionContentsColumns}, tokenize = "snowball unicode61 russian english")`
+  ].join(" ");
+
+  const populateSearchQuery = [
+    "INSERT INTO",
+    "search",
+    "SELECT",
+    questionContentsColumns,
+    "FROM",
+    "questions"
+  ].join(" ");
+
+  const createSearchIndex = () => {
+    console.log("Building search index...");
+    return loadStemmerExt().then(sqlite =>
+      db.schema
+        .dropTableIfExists("search")
+        .then(() => db.connection(sqlite).raw(createSearchQuery))
+        .then(() => db.connection(sqlite).raw(populateSearchQuery))
+    );
+  };
 
   return {
     upsertTournament,
     upsertQuestion,
     markAllObsolete,
-    getQuestions,
-    run
+    run,
+    createSearchIndex
   };
 };
 

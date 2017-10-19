@@ -52,6 +52,7 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const fetchUrl = (n, parentId) => {
     console.log(`Fetching tour #${n}`);
+    if (n > 100) return;
 
     return fetchQueue
       .add(() =>
@@ -70,7 +71,9 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
   };
 
   const fetchDb = () =>
-    dbManager.run(() => dbManager.markAllObsolete().then(() => fetchUrl(0)));
+    dbManager
+      .run(() => dbManager.markAllObsolete().then(() => fetchUrl(0)))
+      .then(dbManager.createSearchIndex);
 
   return { fetchDb };
 };

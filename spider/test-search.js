@@ -1,9 +1,20 @@
-const lunr = require("lunr");
-const fs = require("fs");
 const path = require("path");
+const sqlite3 = require("sqlite3").verbose();
 
-const INDEX_NAME = "db-index.json";
+const dbFile = path.join(__dirname, "db.sqlite3");
+const db = new sqlite3.Database(dbFile);
 
-const indexDump = JSON.parse(fs.readFileSync(path.join(__dirname, INDEX_NAME)));
-lunr.multiLanguage("en", "ru");
-const index = lunr.Index.load(indexDump);
+db.serialize(() => {
+  db.loadExtension(path.join(__dirname, "fts5stemmer.dylib"));
+  db.all(
+    "select * from search where search match ? order by rank  limit 10",
+    ["пушкин"],
+    (e, r) => {
+      r.map(r => r.question).forEach(q => {
+        console.log(JSON.stringify(q));
+        console.log();
+      });
+    }
+  );
+});
+db.close();
