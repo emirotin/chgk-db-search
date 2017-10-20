@@ -197,20 +197,25 @@ const DbManager = () => {
     "comments",
     "authors",
     "sources"
-  ].join(", ");
+  ];
 
   const createSearchQuery = [
     "CREATE VIRTUAL TABLE",
     "search",
     "USING",
-    `fts5(${questionContentsColumns}, tokenize = "snowball russian english unicode61")`
+    `fts5(${questionContentsColumns.join(
+      ", "
+    )}, tokenize = "snowball russian english unicode61")`
   ].join(" ");
+
+  const normalizeColumn = column =>
+    `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
 
   const populateSearchQuery = [
     "INSERT INTO",
     "search",
     "SELECT",
-    questionContentsColumns,
+    questionContentsColumns.map(normalizeColumn).join(", "),
     "FROM",
     "questions",
     "WHERE obsolete IS NULL"
@@ -218,6 +223,7 @@ const DbManager = () => {
 
   const runRaw = (sqlite, query) =>
     new Promise((resolve, reject) => {
+      console.log(query);
       sqlite.run(query, err => {
         if (err) {
           return reject(err);

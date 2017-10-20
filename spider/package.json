@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:migrate": "knex migrate:latest"
+    "db:migrate": "knex migrate:latest",
+    "db:update": "npm run db:migrate && node run-spider.js",
+    "db:reset": "rimraf db.sqlite3 && npm run db:migrate"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +22,7 @@
     "promise-queue": "^2.2.3",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
+    "rimraf": "^2.6.2",
     "sqlite3": "^3.1.13",
     "xml2json": "^0.11.0"
   }
