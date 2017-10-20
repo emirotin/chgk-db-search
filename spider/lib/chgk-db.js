@@ -52,7 +52,6 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const fetchUrl = (n, parentId) => {
     console.log(`Fetching tour #${n}`);
-    if (n > 100) return;
 
     return fetchQueue
       .add(() =>

@@ -177,20 +177,18 @@ const DbManager = () => {
     });
   };
 
-  const loadStemmerExt = () =>
-    db.client.acquireConnection().then(sqlite =>
-      new Promise((resolve, reject) => {
-        sqlite.loadExtension(
-          path.join(__dirname, "..", "fts5stemmer.dylib"),
-          err => {
-            if (err) {
-              return reject(err);
-            }
-            resolve();
+  const loadStemmerExt = sqlite =>
+    new Promise((resolve, reject) => {
+      sqlite.loadExtension(
+        path.join(__dirname, "..", "fts5stemmer.dylib"),
+        err => {
+          if (err) {
+            return reject(err);
           }
-        );
-      }).thenReturn(sqlite)
-    );
+          resolve();
+        }
+      );
+    });
 
   const questionContentsColumns = [
     "question",
@@ -205,7 +203,7 @@ const DbManager = () => {
     "CREATE VIRTUAL TABLE",
     "search",
     "USING",
-    `fts5(${questionContentsColumns}, tokenize = "snowball unicode61 russian english")`
+    `fts5(${questionContentsColumns}, tokenize = "snowball russian english unicode61")`
   ].join(" ");
 
   const populateSearchQuery = [
@@ -214,17 +212,33 @@ const DbManager = () => {
     "SELECT",
     questionContentsColumns,
     "FROM",
-    "questions"
+    "questions",
+    "WHERE obsolete IS NULL"
   ].join(" ");
+
+  const runRaw = (sqlite, query) =>
+    new Promise((resolve, reject) => {
+      sqlite.run(query, err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
 
   const createSearchIndex = () => {
     console.log("Building search index...");
-    return loadStemmerExt().then(sqlite =>
-      db.schema
-        .dropTableIfExists("search")
-        .then(() => db.connection(sqlite).raw(createSearchQuery))
-        .then(() => db.connection(sqlite).raw(populateSearchQuery))
-    );
+    return db.client
+      .acquireConnection()
+      .then(sqlite =>
+        loadStemmerExt(sqlite)
+          .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
+          .then(() => runRaw(sqlite, createSearchQuery))
+          .then(() => runRaw(sqlite, populateSearchQuery))
+      )
+      .then(() => {
+        console.log("Search index built");
+      });
   };
 
   return {
