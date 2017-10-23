@@ -8,7 +8,9 @@ const query = process.argv
   .slice(2)
   .join(" ")
   .replace(/ё/g, "е")
-  .replace(/Ё/g, "Е");
+  .replace(/Ё/g, "Е")
+  .replace(/\s/gi, " ")
+  .replace(/[^a-z0-9а-я ]/gi, "");
 
 db.serialize(() => {
   db.loadExtension(path.join(__dirname, "fts5stemmer.dylib"));
