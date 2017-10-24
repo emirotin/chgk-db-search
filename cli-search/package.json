@@ -1,27 +1,22 @@
 {
-  "name": "chgk-db-spider",
+  "name": "chgk-db-cli-search",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:migrate": "knex migrate:latest",
-    "db:update": "npm run db:migrate && node run-spider.js",
-    "db:reset": "rimraf db.sqlite3 && npm run db:migrate"
+    "db:download":
+      "rimraf db-new.sqlite3 && node download-db.js && mv db-new.sqlite3 db.sqlite3"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.5.1",
-    "github-release-cli": "^0.3.0",
-    "knex": "^0.13.0",
-    "lodash": "^4.17.4",
-    "promise-queue": "^2.2.3",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rimraf": "^2.6.2",
     "sqlite3": "^3.1.13",
-    "xml2json": "^0.11.0"
+    "tar-stream": "^1.5.4"
   }
 }
