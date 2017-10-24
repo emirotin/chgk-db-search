@@ -229,7 +229,6 @@ const DbManager = () => {
 
   const runRaw = (sqlite, query) =>
     new Promise((resolve, reject) => {
-      console.log(query);
       sqlite.run(query, err => {
         if (err) {
           return reject(err);
