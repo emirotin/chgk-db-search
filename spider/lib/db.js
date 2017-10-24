@@ -1,4 +1,5 @@
 const path = require("path");
+const os = require("os");
 const Promise = require("bluebird");
 const env = process.env.NODE_ENV || "development";
 const isDev = env === "development";
@@ -180,7 +181,7 @@ const DbManager = () => {
   const loadStemmerExt = sqlite =>
     new Promise((resolve, reject) => {
       sqlite.loadExtension(
-        path.join(__dirname, "..", "fts5stemmer.dylib"),
+        path.join(__dirname, "..", "sqlite-ext", os.platform(), "fts5stemmer"),
         err => {
           if (err) {
             return reject(err);
@@ -196,20 +197,25 @@ const DbManager = () => {
     "altAnswers",
     "comments",
     "authors",
-    "sources"
+    "sources",
+    "id"
   ];
 
   const createSearchQuery = [
     "CREATE VIRTUAL TABLE",
     "search",
     "USING",
-    `fts5(${questionContentsColumns.join(
-      ", "
-    )}, tokenize = "snowball russian english unicode61")`
+    `fts5(${questionContentsColumns
+      .map(column => (column === "id" ? "id UNINDEXED" : column))
+      .join(
+        ", "
+      )}, tokenize = "snowball russian english unicode61", content="questions", content_rowid="id")`
   ].join(" ");
 
   const normalizeColumn = column =>
-    `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
+    column === "id"
+      ? "id"
+      : `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
 
   const populateSearchQuery = [
     "INSERT INTO",

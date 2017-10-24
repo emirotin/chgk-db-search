@@ -1,4 +1,6 @@
 const path = require("path");
+const os = require("os");
+
 const sqlite3 = require("sqlite3").verbose();
 
 const dbFile = path.join(__dirname, "db.sqlite3");
@@ -6,14 +8,25 @@ const db = new sqlite3.Database(dbFile);
 
 const query = process.argv
   .slice(2)
-  .join(" ")
-  .replace(/ё/g, "е")
-  .replace(/Ё/g, "Е")
-  .replace(/\s/gi, " ")
-  .replace(/[^a-z0-9а-я ]/gi, "");
+  .map(
+    s =>
+      `"${s
+        .replace(/ё/g, "е")
+        .replace(/Ё/g, "Е")
+        .replace(/\s+/gi, " ")
+        .replace(/"/gi, '""')}"`
+  )
+  .join("+");
 
 db.serialize(() => {
-  db.loadExtension(path.join(__dirname, "fts5stemmer.dylib"));
+  const extPath = path.join(
+    __dirname,
+    "sqlite-ext",
+    os.platform(),
+    "fts5stemmer"
+  );
+  db.loadExtension(extPath);
+
   db.all(
     "select * from search where search match ? order by rank limit 10",
     [query],
@@ -26,8 +39,8 @@ db.serialize(() => {
         console.warn("Ничего не найдено.");
         return;
       }
-      results.map(r => r.question).forEach(q => {
-        console.log(q);
+      results.forEach(r => {
+        console.log(r);
         console.log();
       });
     }
