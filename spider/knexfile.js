@@ -3,7 +3,7 @@ module.exports = {
   development: {
     client: "sqlite3",
     connection: {
-      filename: path.join(__dirname, "db.sqlite3")
+      filename: path.join(__dirname, "db", "db.sqlite3")
     }
   },
 

@@ -14,4 +14,5 @@ script:
 
 cache:
   directories:
-    - "node_modules"
+    - "spider/node_modules"
+    - "spider/db"
