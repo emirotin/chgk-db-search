@@ -1,8 +1,6 @@
 const path = require("path");
 const Promise = require("bluebird");
-const env = process.env.NODE_ENV || "development";
-const isDev = env === "development";
-const config = require("../knexfile")[env];
+const config = require("../knexfile");
 const knex = require("knex");
 const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
