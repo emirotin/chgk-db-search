@@ -6,11 +6,11 @@ node_js:
 
 before_install:
   - cd spider
-  - fail-if-not-travis-cron.sh
+  - ./fail-if-not-travis-cron.sh
   - npm i -g npm@4
 
 script:
-  - build-db.sh
+  - ./build-db.sh
 
 cache:
   directories:
