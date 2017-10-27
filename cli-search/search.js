@@ -1,5 +1,4 @@
 const path = require("path");
-const os = require("os");
 
 const sqlite3 = require("sqlite3").verbose();
 
@@ -22,7 +21,7 @@ db.serialize(() => {
   const extPath = path.join(
     __dirname,
     "sqlite-ext",
-    os.platform(),
+    process.platform,
     "fts5stemmer"
   );
   db.loadExtension(extPath);

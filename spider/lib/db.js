@@ -1,5 +1,4 @@
 const path = require("path");
-const os = require("os");
 const Promise = require("bluebird");
 const env = process.env.NODE_ENV || "development";
 const isDev = env === "development";
@@ -181,7 +180,13 @@ const DbManager = () => {
   const loadStemmerExt = sqlite =>
     new Promise((resolve, reject) => {
       sqlite.loadExtension(
-        path.join(__dirname, "..", "sqlite-ext", os.platform(), "fts5stemmer"),
+        path.join(
+          __dirname,
+          "..",
+          "sqlite-ext",
+          process.platform,
+          "fts5stemmer"
+        ),
         err => {
           if (err) {
             return reject(err);
