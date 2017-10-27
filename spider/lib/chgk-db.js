@@ -3,6 +3,7 @@ const request = require("request-promise");
 const xml2json = require("xml2json");
 const Queue = require("promise-queue");
 Queue.configure(Promise);
+const debug = require("debug")("chgk-db:spider:chgk-db");
 
 const { DbManager } = require("./db");
 
@@ -51,7 +52,7 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
   };
 
   const fetchUrl = (n, parentId) => {
-    console.log(`Fetching tour #${n}`);
+    debug(`Fetching tour #${n}`);
 
     return fetchQueue
       .add(() =>

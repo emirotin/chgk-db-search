@@ -15,6 +15,7 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "dateformat": "^3.0.2",
+    "debug": "^3.1.0",
     "github-release-cli": "^0.3.0",
     "knex": "^0.13.0",
     "lodash": "^4.17.4",

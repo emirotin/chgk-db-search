@@ -7,6 +7,7 @@ const knex = require("knex");
 const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
+const debug = require("debug")("chgk-db:spider:db");
 
 const defaultForEmptyObj = (o, d = null) => {
   if (!o) return d;
@@ -119,7 +120,7 @@ const DbManager = () => {
   const upsertTournament = (data, parentId = null) => {
     const dbId = parseInt(data.Id);
 
-    console.log(`Upsert tour #${dbId}`);
+    debug(`Upsert tour #${dbId}`);
 
     const newRecord = {
       dbId,
@@ -142,7 +143,7 @@ const DbManager = () => {
       whereFields: { dbId },
       dataFields: newRecord
     }).catch(e => {
-      console.error(e);
+      debug("Upsert tour error:", e);
       throw e;
     });
   };
@@ -150,7 +151,7 @@ const DbManager = () => {
   const upsertQuestion = (data, tournamentId) => {
     const dbId = parseInt(data.QuestionId);
 
-    console.log(`Upsert question #${dbId}`);
+    debug(`Upsert question #${dbId}`);
 
     const newRecord = {
       dbId,
@@ -175,6 +176,9 @@ const DbManager = () => {
       tableName: "questions",
       whereFields: { dbId },
       dataFields: newRecord
+    }).catch(e => {
+      debug("Upsert question error:", e);
+      throw e;
     });
   };
 
@@ -254,7 +258,7 @@ const DbManager = () => {
           .then(() => runRaw(sqlite, populateSearchQuery))
       )
       .then(() => {
-        console.log("Search index built");
+        console.log("Search index built.");
       });
   };
 
