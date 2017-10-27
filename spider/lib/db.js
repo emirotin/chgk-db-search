@@ -6,6 +6,7 @@ const config = require("../knexfile")[env];
 const knex = require("knex");
 const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
+const dateFormat = require("dateformat");
 
 const defaultForEmptyObj = (o, d = null) => {
   if (!o) return d;
@@ -257,12 +258,20 @@ const DbManager = () => {
       });
   };
 
+  const getDbVersion = () =>
+    getTable({ db, tableName: "tournaments" })
+      .max("dbUpdatedAt as dbUpdatedAt")
+      .get(0)
+      .get("dbUpdatedAt")
+      .then(ts => dateFormat(new Date(ts), "yyyymmdd-HHMMss", true));
+
   return {
     upsertTournament,
     upsertQuestion,
     markAllObsolete,
     run,
-    createSearchIndex
+    createSearchIndex,
+    getDbVersion
   };
 };
 
