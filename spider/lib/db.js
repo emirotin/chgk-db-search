@@ -260,12 +260,24 @@ const DbManager = () => {
       });
   };
 
-  const getDbVersion = () =>
-    getTable({ db, tableName: "tournaments" })
+  const getDbVersion = () => {
+    const schemaV = getTable({ db, tableName: "knex_migrations" })
+      .count("id as count")
+      .get(0)
+      .get("count");
+
+    const questionsV = getTable({ db, tableName: "tournaments" })
       .max("dbUpdatedAt as dbUpdatedAt")
       .get(0)
       .get("dbUpdatedAt")
-      .then(ts => dateFormat(new Date(ts), "yyyymmdd-HHMMss", true));
+      .then(ts => dateFormat(new Date(ts), "yyyymmddHHMMss", true));
+
+    return Promise.join(
+      schemaV,
+      questionsV,
+      (schemaV, questionsV) => `${schemaV}-${questionsV}`
+    );
+  };
 
   return {
     upsertTournament,
