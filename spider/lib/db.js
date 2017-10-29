@@ -2,9 +2,7 @@ const path = require("path");
 const Promise = require("bluebird");
 const config = require("../knexfile");
 const knex = require("knex");
-const {
-  parseInt
-} = require("lodash");
+const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
 const debug = require("debug")("chgk-db:spider:db");
@@ -15,11 +13,7 @@ const defaultForEmptyObj = (o, d = null) => {
   return o;
 };
 
-const getTable = ({
-  db,
-  trx,
-  tableName
-}) => {
+const getTable = ({ db, trx, tableName }) => {
   const t = db(tableName);
   if (trx) {
     return t.transacting(trx);
@@ -27,28 +21,18 @@ const getTable = ({
   return t;
 };
 
-const findKey = ({
-    db,
-    trx,
-    tableName,
-    whereFields,
-    keyField = "id"
-  }) =>
+const findKey = ({ db, trx, tableName, whereFields, keyField = "id" }) =>
   getTable({
     db,
     trx,
     tableName
   })
-  .select(keyField)
-  .where(whereFields)
-  .get(0)
-  .then(record => (record ? record[keyField] : null));
+    .select(keyField)
+    .where(whereFields)
+    .get(0)
+    .then(record => (record ? record[keyField] : null));
 
-const findTouramentId = ({
-    db,
-    trx,
-    whereFields
-  }) =>
+const findTouramentId = ({ db, trx, whereFields }) =>
   findKey({
     db,
     trx,
@@ -57,13 +41,13 @@ const findTouramentId = ({
   });
 
 const upsert = ({
-    db,
-    trx,
-    tableName,
-    whereFields,
-    dataFields,
-    keyField = "id"
-  }) =>
+  db,
+  trx,
+  tableName,
+  whereFields,
+  dataFields,
+  keyField = "id"
+}) =>
   findKey({
     db,
     trx,
@@ -93,18 +77,18 @@ const insertOrUpdate = ({
 }) => {
   if (!key) {
     return getTable({
-        db,
-        trx,
-        tableName
-      })
+      db,
+      trx,
+      tableName
+    })
       .insert(Object.assign({}, updateFields, extraInsertFields))
       .get(0);
   } else {
     return getTable({
-        db,
-        trx,
-        tableName
-      })
+      db,
+      trx,
+      tableName
+    })
       .where(keyField, key)
       .update(updateFields)
       .thenReturn(key);
@@ -113,13 +97,16 @@ const insertOrUpdate = ({
 
 const DbManager = () => {
   const db = knex(
-    Object.assign({
-      useNullAsDefault: true,
-      pool: {
-        min: 2,
-        max: 10
-      }
-    }, config)
+    Object.assign(
+      {
+        useNullAsDefault: true,
+        pool: {
+          min: 2,
+          max: 10
+        }
+      },
+      config
+    )
   );
 
   let currentTrx = null;
@@ -239,21 +226,20 @@ const DbManager = () => {
 
   const loadStemmerExt = sqlite =>
     new Promise((resolve, reject) => {
-      sqlite.loadExtension(
-        path.join(
-          __dirname,
-          "..",
-          "sqlite-ext",
-          process.platform,
-          "fts5stemmer"
-        ),
-        err => {
-          if (err) {
-            return reject(err);
-          }
-          resolve();
-        }
+      const extPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "stemmer-sqliteext",
+        process.platform,
+        "fts5stemmer"
       );
+      sqlite.loadExtension(extPath, err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
     });
 
   const questionContentsColumns = [
@@ -278,9 +264,9 @@ const DbManager = () => {
   ].join(" ");
 
   const normalizeColumn = column =>
-    column === "id" ?
-    "id" :
-    `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
+    column === "id"
+      ? "id"
+      : `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
 
   const populateSearchQuery = [
     "INSERT INTO",
@@ -308,9 +294,9 @@ const DbManager = () => {
       .acquireConnection()
       .then(sqlite =>
         loadStemmerExt(sqlite)
-        .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
-        .then(() => runRaw(sqlite, createSearchQuery))
-        .then(() => runRaw(sqlite, populateSearchQuery))
+          .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
+          .then(() => runRaw(sqlite, createSearchQuery))
+          .then(() => runRaw(sqlite, populateSearchQuery))
       )
       .then(() => {
         console.log("Search index built.");
@@ -319,17 +305,17 @@ const DbManager = () => {
 
   const getDbVersion = () => {
     const schemaV = getTable({
-        db,
-        tableName: "knex_migrations"
-      })
+      db,
+      tableName: "knex_migrations"
+    })
       .max("id as maxId")
       .get(0)
       .get("maxId");
 
     const questionsV = getTable({
-        db,
-        tableName: "tournaments"
-      })
+      db,
+      tableName: "tournaments"
+    })
       .max("dbUpdatedAt as dbUpdatedAt")
       .get(0)
       .get("dbUpdatedAt")

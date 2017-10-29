@@ -20,7 +20,8 @@ const query = process.argv
 db.serialize(() => {
   const extPath = path.join(
     __dirname,
-    "sqlite-ext",
+    "..",
+    "stemmer-sqliteext",
     process.platform,
     "fts5stemmer"
   );
