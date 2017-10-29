@@ -2,7 +2,9 @@ const path = require("path");
 const Promise = require("bluebird");
 const config = require("../knexfile");
 const knex = require("knex");
-const { parseInt } = require("lodash");
+const {
+  parseInt
+} = require("lodash");
 const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
 const debug = require("debug")("chgk-db:spider:db");
@@ -13,7 +15,11 @@ const defaultForEmptyObj = (o, d = null) => {
   return o;
 };
 
-const getTable = ({ db, trx, tableName }) => {
+const getTable = ({
+  db,
+  trx,
+  tableName
+}) => {
   const t = db(tableName);
   if (trx) {
     return t.transacting(trx);
@@ -21,25 +27,50 @@ const getTable = ({ db, trx, tableName }) => {
   return t;
 };
 
-const findKey = ({ db, trx, tableName, whereFields, keyField = "id" }) =>
-  getTable({ db, trx, tableName })
-    .select(keyField)
-    .where(whereFields)
-    .get(0)
-    .then(record => (record ? record[keyField] : null));
+const findKey = ({
+    db,
+    trx,
+    tableName,
+    whereFields,
+    keyField = "id"
+  }) =>
+  getTable({
+    db,
+    trx,
+    tableName
+  })
+  .select(keyField)
+  .where(whereFields)
+  .get(0)
+  .then(record => (record ? record[keyField] : null));
 
-const findTouramentId = ({ db, trx, whereFields }) =>
-  findKey({ db, trx, tableName: "tournaments", whereFields });
+const findTouramentId = ({
+    db,
+    trx,
+    whereFields
+  }) =>
+  findKey({
+    db,
+    trx,
+    tableName: "tournaments",
+    whereFields
+  });
 
 const upsert = ({
-  db,
-  trx,
-  tableName,
-  whereFields,
-  dataFields,
-  keyField = "id"
-}) =>
-  findKey({ db, trx, tableName, whereFields, keyField }).then(key =>
+    db,
+    trx,
+    tableName,
+    whereFields,
+    dataFields,
+    keyField = "id"
+  }) =>
+  findKey({
+    db,
+    trx,
+    tableName,
+    whereFields,
+    keyField
+  }).then(key =>
     insertOrUpdate({
       db,
       trx,
@@ -61,11 +92,19 @@ const insertOrUpdate = ({
   keyField = "id"
 }) => {
   if (!key) {
-    return getTable({ db, trx, tableName })
+    return getTable({
+        db,
+        trx,
+        tableName
+      })
       .insert(Object.assign({}, updateFields, extraInsertFields))
       .get(0);
   } else {
-    return getTable({ db, trx, tableName })
+    return getTable({
+        db,
+        trx,
+        tableName
+      })
       .where(keyField, key)
       .update(updateFields)
       .thenReturn(key);
@@ -74,7 +113,13 @@ const insertOrUpdate = ({
 
 const DbManager = () => {
   const db = knex(
-    Object.assign({ useNullAsDefault: true, pool: { min: 2, max: 10 } }, config)
+    Object.assign({
+      useNullAsDefault: true,
+      pool: {
+        min: 2,
+        max: 10
+      }
+    }, config)
   );
 
   let currentTrx = null;
@@ -107,10 +152,18 @@ const DbManager = () => {
 
   const markAllObsolete = () =>
     Promise.all([
-      getTable({ db, trx: currentTrx, tableName: "tournaments" }).update({
+      getTable({
+        db,
+        trx: currentTrx,
+        tableName: "tournaments"
+      }).update({
         obsolete: 1
       }),
-      getTable({ db, trx: currentTrx, tableName: "questions" }).update({
+      getTable({
+        db,
+        trx: currentTrx,
+        tableName: "questions"
+      }).update({
         obsolete: 1
       })
     ]);
@@ -138,7 +191,9 @@ const DbManager = () => {
       db,
       trx: currentTrx,
       tableName: "tournaments",
-      whereFields: { dbId },
+      whereFields: {
+        dbId
+      },
       dataFields: newRecord
     }).catch(e => {
       debug("Upsert tour error:", e);
@@ -172,7 +227,9 @@ const DbManager = () => {
       db,
       trx: currentTrx,
       tableName: "questions",
-      whereFields: { dbId },
+      whereFields: {
+        dbId
+      },
       dataFields: newRecord
     }).catch(e => {
       debug("Upsert question error:", e);
@@ -221,9 +278,9 @@ const DbManager = () => {
   ].join(" ");
 
   const normalizeColumn = column =>
-    column === "id"
-      ? "id"
-      : `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
+    column === "id" ?
+    "id" :
+    `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
 
   const populateSearchQuery = [
     "INSERT INTO",
@@ -251,9 +308,9 @@ const DbManager = () => {
       .acquireConnection()
       .then(sqlite =>
         loadStemmerExt(sqlite)
-          .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
-          .then(() => runRaw(sqlite, createSearchQuery))
-          .then(() => runRaw(sqlite, populateSearchQuery))
+        .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
+        .then(() => runRaw(sqlite, createSearchQuery))
+        .then(() => runRaw(sqlite, populateSearchQuery))
       )
       .then(() => {
         console.log("Search index built.");
@@ -261,12 +318,18 @@ const DbManager = () => {
   };
 
   const getDbVersion = () => {
-    const schemaV = getTable({ db, tableName: "knex_migrations" })
-      .count("id as count")
+    const schemaV = getTable({
+        db,
+        tableName: "knex_migrations"
+      })
+      .max("id as maxId")
       .get(0)
-      .get("count");
+      .get("maxId");
 
-    const questionsV = getTable({ db, tableName: "tournaments" })
+    const questionsV = getTable({
+        db,
+        tableName: "tournaments"
+      })
       .max("dbUpdatedAt as dbUpdatedAt")
       .get(0)
       .get("dbUpdatedAt")
