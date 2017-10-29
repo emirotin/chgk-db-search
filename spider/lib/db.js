@@ -1,11 +1,12 @@
-const path = require("path");
 const Promise = require("bluebird");
-const config = require("../knexfile");
 const knex = require("knex");
 const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
 const debug = require("debug")("chgk-db:spider:db");
+
+const knexConfig = require("../knexfile");
+const _createSearchIndex = require("./search-index");
 
 const defaultForEmptyObj = (o, d = null) => {
   if (!o) return d;
@@ -95,19 +96,41 @@ const insertOrUpdate = ({
   }
 };
 
+const tournamentType = dbType => {
+  switch (dbType) {
+    case "Т":
+      return "tour";
+    case "Ч":
+      return "tournament";
+    default:
+      return "group";
+  }
+};
+
+const questionType = dbType => {
+  switch (dbType) {
+    case "Ч":
+    case "ЧД":
+    case "ЧБ":
+    case "И":
+      return "chgk";
+    case "Б":
+    case "ДБ":
+    case "БД":
+      return "brain";
+    case "Я":
+      return "si";
+    case "Э":
+      return "loto";
+    case "Л":
+      return "no-wings";
+    default:
+      return "group";
+  }
+};
+
 const DbManager = () => {
-  const db = knex(
-    Object.assign(
-      {
-        useNullAsDefault: true,
-        pool: {
-          min: 2,
-          max: 10
-        }
-      },
-      config
-    )
-  );
+  const db = knex(knexConfig);
 
   let currentTrx = null;
 
@@ -155,7 +178,7 @@ const DbManager = () => {
       })
     ]);
 
-  const upsertTournament = (data, parentId = null) => {
+  const upsertTournament = Promise.method((data, parentId = null) => {
     const dbId = parseInt(data.Id);
 
     debug(`Upsert tour #${dbId}`);
@@ -164,9 +187,12 @@ const DbManager = () => {
       dbId,
       parentId,
       parentDbId: parseInt(data.ParentId || 0),
-      title: dbId === 0 ? "<корень>" : data.Title || "?",
+      type: tournamentType(data.Type),
       dbTextId: data.TextId || "",
       number: defaultForEmptyObj(data.Number),
+
+      title: dbId === 0 ? "<корень>" : data.Title || "?",
+
       dbCreatedAt: data.CreatedAt ? new Date(data.CreatedAt) : null,
       dbUpdatedAt: data.LastUpdated ? new Date(data.LastUpdated) : null,
 
@@ -186,9 +212,9 @@ const DbManager = () => {
       debug("Upsert tour error:", e);
       throw e;
     });
-  };
+  });
 
-  const upsertQuestion = (data, tournamentId) => {
+  const upsertQuestion = Promise.method((data, tournamentId) => {
     const dbId = parseInt(data.QuestionId);
 
     debug(`Upsert question #${dbId}`);
@@ -197,6 +223,7 @@ const DbManager = () => {
       dbId,
       tournamentDbId: parseInt(data.ParentId),
       tournamentId,
+      type: questionType(data.Type),
       dbTextId: defaultForEmptyObj(data.TextId, ""),
       number: defaultForEmptyObj(data.Number),
 
@@ -222,82 +249,13 @@ const DbManager = () => {
       debug("Upsert question error:", e);
       throw e;
     });
-  };
-
-  const loadStemmerExt = sqlite =>
-    new Promise((resolve, reject) => {
-      const extPath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "stemmer-sqliteext",
-        process.platform,
-        "fts5stemmer"
-      );
-      sqlite.loadExtension(extPath, err => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
-    });
-
-  const questionContentsColumns = [
-    "question",
-    "answer",
-    "altAnswers",
-    "comments",
-    "authors",
-    "sources",
-    "id"
-  ];
-
-  const createSearchQuery = [
-    "CREATE VIRTUAL TABLE",
-    "search",
-    "USING",
-    `fts5(${questionContentsColumns
-      .map(column => (column === "id" ? "id UNINDEXED" : column))
-      .join(
-        ", "
-      )}, tokenize = "snowball russian english unicode61", content="questions", content_rowid="id")`
-  ].join(" ");
-
-  const normalizeColumn = column =>
-    column === "id"
-      ? "id"
-      : `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
-
-  const populateSearchQuery = [
-    "INSERT INTO",
-    "search",
-    "SELECT",
-    questionContentsColumns.map(normalizeColumn).join(", "),
-    "FROM",
-    "questions",
-    "WHERE obsolete IS NULL"
-  ].join(" ");
-
-  const runRaw = (sqlite, query) =>
-    new Promise((resolve, reject) => {
-      sqlite.run(query, err => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
-    });
+  });
 
   const createSearchIndex = () => {
     console.log("Building search index...");
     return db.client
       .acquireConnection()
-      .then(sqlite =>
-        loadStemmerExt(sqlite)
-          .then(() => runRaw(sqlite, "DROP TABLE IF EXISTS search"))
-          .then(() => runRaw(sqlite, createSearchQuery))
-          .then(() => runRaw(sqlite, populateSearchQuery))
-      )
+      .then(_createSearchIndex)
       .then(() => {
         console.log("Search index built.");
       });
