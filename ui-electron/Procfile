@@ -1,2 +1,0 @@
-react: BROWSER=none npm run start-react
-electron: node tools/electron-wait-react
