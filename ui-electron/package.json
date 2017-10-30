@@ -1,15 +1,24 @@
 {
-  "name": "chgk-db-search-ui-electron",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
+  "name": "renderer",
+  "version": "0.1.0",
+  "private": true,
+  "main": "start-electron.js",
+  "dependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-scripts": "1.0.14"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "start-react": "react-scripts start",
+    "build-react": "react-scripts build",
+    "start": "nf start",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron ."
+  },
   "devDependencies": {
-    "electron": "1.7.9"
-  }
+    "electron": "^1.7.9",
+    "foreman": "^2.0.0"
+  },
+  "homepage": "./"
 }
