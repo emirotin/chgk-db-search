@@ -9,17 +9,17 @@
     "react-scripts": "1.0.14"
   },
   "scripts": {
-    "start-react": "react-scripts start",
-    "build-react": "react-scripts build",
+    "start-react": "NODE_ENV=development react-scripts start",
+    "build-react": "NODE_ENV=production react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "start":
-      "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'"
+    "start": "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
     "electron": "^1.7.9",
+    "electron-devtools-installer": "^2.2.1",
     "wait-on": "^2.0.2"
   },
   "homepage": "./"
