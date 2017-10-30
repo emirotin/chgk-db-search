@@ -1,26 +1,30 @@
 {
-  "name": "renderer",
+  "name": "chgk-search-electron-ui",
   "version": "0.1.0",
   "private": true,
   "main": "start-electron.js",
-  "dependencies": {
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "react-scripts": "1.0.14"
-  },
+  "dependencies": {},
   "scripts": {
     "start-react": "NODE_ENV=development react-scripts start",
     "build-react": "NODE_ENV=production react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "start": "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'"
+    "start":
+      "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
+    "build":
+      "npm run build-react && rm -rf dist/* && electron-packager . --ignore='src|public|\\.gitignore|package\\.json|README*' --out=dist"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
     "electron": "^1.7.9",
     "electron-devtools-installer": "^2.2.1",
-    "wait-on": "^2.0.2"
+    "electron-packager": "^9.1.0",
+    "wait-on": "^2.0.2",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-scripts": "1.0.14"
   },
-  "homepage": "./"
+  "homepage": "./",
+  "productName": "Chgk Search"
 }
