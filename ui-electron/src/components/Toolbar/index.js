@@ -10,13 +10,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   text: {
-    color: "white"
+    color: "white",
+    marginBottom: "10px"
   }
 });
 
 const Toolbar = ({ style }) => (
   <View style={[style, styles.toolbar]}>
-    <Text style={styles.text}>SOME TEXT</Text>
+    <Text style={styles.text}>Ищи тут:</Text>
     <TextInput style={styles.textInput} autoFocus />
   </View>
 );

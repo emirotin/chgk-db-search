@@ -12,10 +12,15 @@ const styles = StyleSheet.create({
   }
 });
 
-const SearchResults = ({ style }) => (
+const SearchResults = ({
+  style,
+  state: { count, page, pagesCount, results }
+}) => (
   <View style={[style, styles.panel]}>
-    <Text style={styles.text}>SOME TEXT</Text>
-    {[1, 2, 3].map(n => <QuestionCard key={n} text={n} />)}
+    <Text style={styles.text}>
+      Результатов: {count}, с. {page} из {pagesCount}
+    </Text>
+    {results.map((question, n) => <QuestionCard key={n} question={question} />)}
   </View>
 );
 

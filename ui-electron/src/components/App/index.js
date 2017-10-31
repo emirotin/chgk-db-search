@@ -1,14 +1,41 @@
-import React from "react";
+import React, { Component } from "react";
 import { StyleSheet } from "react-native";
 
 import Toolbar from "../Toolbar";
 import SearchResults from "../SearchResults";
 
-// Components
-const App = () => [
-  <Toolbar style={styles.toolbar} key="Toolbar" />,
-  <SearchResults style={styles.results} key="SearchResults" />
-];
+const PAGE_SIZE = 10;
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      count: 0,
+      page: 1,
+      pagesCount: 100,
+      results: []
+    };
+  }
+
+  onSearchChange(searchParams) {
+    //
+  }
+
+  render() {
+    return [
+      <Toolbar
+        style={styles.toolbar}
+        key="Toolbar"
+        onSearchChange={this.onSearchChange.bind(this)}
+      />,
+      <SearchResults
+        style={styles.results}
+        key="SearchResults"
+        state={this.state}
+      />
+    ];
+  }
+}
 
 // Styles
 const styles = StyleSheet.create({

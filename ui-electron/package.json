@@ -10,8 +10,10 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "start": "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
-    "build": "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='src|public|README.*|\\.gitignore' --out=dist"
+    "start":
+      "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
+    "build":
+      "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='src|public|README.*|\\.gitignore' --out=dist"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
@@ -20,7 +22,7 @@
     "electron-packager": "^9.1.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-native-simple-markdown": "^1.0.60-rc.3",
+    "react-native-markdown-view": "^1.0.60-rc.3",
     "react-native-web": "^0.1.12",
     "react-scripts": "1.0.14",
     "wait-on": "^2.0.2"

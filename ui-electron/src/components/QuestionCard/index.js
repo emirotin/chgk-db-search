@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { MarkdownView as Markdown } from "react-native-markdown-view";
 
 const styles = StyleSheet.create({
   card: {
@@ -16,9 +17,17 @@ const styles = StyleSheet.create({
   }
 });
 
-const QuestionCard = ({ style, text }) => (
+const QuestionCard = ({ style, question }) => (
   <View style={[style, styles.card]}>
-    <Text style={styles.text}>{text}</Text>
+    <Markdown
+      styles={{
+        strong: {
+          color: "red"
+        }
+      }}
+    >
+      {question.question}
+    </Markdown>
   </View>
 );
 
