@@ -57,7 +57,7 @@ const populateSearchQuery = [
   "search",
   `(rowid, ${questionContentsColumns.join(", ")})`,
   "SELECT",
-  questionContentsColumns.map(normalizeColumn).join(", "),
+  `id, ${questionContentsColumns.map(normalizeColumn).join(", ")}`,
   "FROM",
   "questions",
   "WHERE obsolete IS NULL"

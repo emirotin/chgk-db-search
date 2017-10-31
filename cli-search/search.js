@@ -30,6 +30,7 @@ db.serialize(() => {
   db.loadExtension(extPath);
 
   db.all(
+    // select highlight(search, 0, '<b>', '</b>') as hl, * from search join questions on search.rowid = questions.id where search match 'Пушкин' and questions.type = "si" order by rank limit 10
     "select * from search where search match (?) limit 20",
     [query],
     (err, results) => {
