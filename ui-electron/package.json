@@ -13,7 +13,7 @@
     "start":
       "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
     "build":
-      "npm run build-react && rm -rf dist/* && electron-packager . --ignore='src|public|\\.gitignore|package\\.json|README*' --out=dist"
+      "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='src|public|README.*|\\.gitignore' --out=dist"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
