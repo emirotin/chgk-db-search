@@ -35,8 +35,7 @@ const questionContentsColumns = [
   "altAnswers",
   "comments",
   "authors",
-  "sources",
-  "id"
+  "sources"
 ];
 
 const deleteSearchQuery = "DROP TABLE IF EXISTS search";
@@ -45,21 +44,18 @@ const createSearchQuery = [
   "CREATE VIRTUAL TABLE",
   "search",
   "USING",
-  `fts5(${questionContentsColumns
-    .map(column => (column === "id" ? "id UNINDEXED" : column))
-    .join(
-      ", "
-    )}, tokenize = "snowball russian english unicode61", content="questions", content_rowid="id")`
+  `fts5(${questionContentsColumns.join(
+    ", "
+  )}, tokenize = "snowball russian english unicode61", content="questions", content_rowid="id")`
 ].join(" ");
 
 const normalizeColumn = column =>
-  column === "id"
-    ? "id"
-    : `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
+  `replace(replace(${column}, "ё", "е"), "Ё", "Е") as ${column}`;
 
 const populateSearchQuery = [
   "INSERT INTO",
   "search",
+  `(rowid, ${questionContentsColumns.join(", ")})`,
   "SELECT",
   questionContentsColumns.map(normalizeColumn).join(", "),
   "FROM",

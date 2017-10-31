@@ -15,7 +15,9 @@ const query = process.argv
         .replace(/\s+/gi, " ")
         .replace(/"/gi, '""')}"`
   )
-  .join("+");
+  .join(" ");
+
+console.log(query);
 
 db.serialize(() => {
   const extPath = path.join(
@@ -28,7 +30,7 @@ db.serialize(() => {
   db.loadExtension(extPath);
 
   db.all(
-    "select * from search where search match ? order by rank limit 10",
+    "select * from search where search match (?) limit 20",
     [query],
     (err, results) => {
       if (err) {
