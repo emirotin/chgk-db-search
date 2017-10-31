@@ -1,6 +1,7 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import "./index.css";
-import App from "./App";
+import { AppRegistry } from "react-native";
+import App from "./components/App";
 
-ReactDOM.render(<App />, document.getElementById("root"));
+AppRegistry.registerComponent("ChgkSearch", () => App);
+AppRegistry.runApplication("ChgkSearch", {
+  rootTag: document.getElementById("root")
+});

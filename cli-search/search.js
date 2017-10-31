@@ -17,8 +17,6 @@ const query = process.argv
   )
   .join(" ");
 
-console.log(query);
-
 db.serialize(() => {
   const extPath = path.join(
     __dirname,
