@@ -20,16 +20,19 @@ const styles = StyleSheet.create({
   }
 });
 
+const FORMATTED_STYLES = {
+  b: {
+    color: "red"
+  }
+};
+
+const FormattedView = ({ text }) => (
+  <HTMLView value={text} stylesheet={FORMATTED_STYLES} />
+);
+
 const QuestionCard = ({ style, question }) => (
   <View style={[style, styles.card]}>
-    <HTMLView
-      value={question.question}
-      stylesheet={{
-        strong: {
-          color: "red"
-        }
-      }}
-    />
+    <FormattedView text={question.question} />
   </View>
 );
 

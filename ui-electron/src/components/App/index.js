@@ -15,7 +15,7 @@ class App extends Component {
       pagesCount: 100,
       results: [
         {
-          question: "<div>Hello <em>world!</em> <strong>BOLD</strong></div>"
+          question: "<div>Hello <em>world!</em> <b>BOLD</strong></b>"
         }
       ]
     };
