@@ -13,7 +13,11 @@ class App extends Component {
       count: 0,
       page: 1,
       pagesCount: 100,
-      results: []
+      results: [
+        {
+          question: "<div>Hello <em>world!</em> <strong>BOLD</strong></div>"
+        }
+      ]
     };
   }
 

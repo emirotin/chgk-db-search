@@ -22,7 +22,8 @@
     "electron-packager": "^9.1.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-native-markdown-view": "^1.0.60-rc.3",
+    "react-native-htmlview":
+      "git@github.com:emirotin/react-native-htmlview.git#es5",
     "react-native-web": "^0.1.12",
     "react-scripts": "1.0.14",
     "wait-on": "^2.0.2"
