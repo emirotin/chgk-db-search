@@ -27,7 +27,7 @@ const FORMATTED_STYLES = {
 };
 
 const FormattedView = ({ text }) => (
-  <HTMLView value={text} stylesheet={FORMATTED_STYLES} />
+  <HTMLView value={`<div>${text}</div>`} stylesheet={FORMATTED_STYLES} />
 );
 
 const QuestionCard = ({ style, question }) => (
