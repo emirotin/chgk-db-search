@@ -13,7 +13,9 @@
     "start":
       "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
     "build":
-      "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='src|public|README.*|\\.gitignore' --out=dist"
+      "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='util|src|public|README.*|\\.gitignore' --out=dist",
+    "db:download":
+      "cd db && rimraf db-new.sqlite3 && node ../util/download-db.js db-new.sqlite3 && mv db-new.sqlite3 db.sqlite3"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
@@ -26,6 +28,9 @@
       "git@github.com:emirotin/react-native-htmlview.git#es5",
     "react-native-web": "^0.1.12",
     "react-scripts": "1.0.14",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "tar-stream": "^1.5.4",
     "wait-on": "^2.0.2"
   },
   "homepage": "./",
