@@ -5,7 +5,7 @@ const dbManager = DbManager();
 dbManager
   .getDbVersion()
   .then(res => {
-    console.log(res.toString("YYYY-MM-DD"));
+    console.log(res);
     process.exit(0);
   })
   .catch(err => {

@@ -72,7 +72,12 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
 
   const fetchDb = () =>
     dbManager
-      .run(() => dbManager.markAllObsolete().then(() => fetchUrl(0)))
+      .run(() =>
+        dbManager
+          .markAllObsolete()
+          .then(() => fetchUrl(0))
+          .then(dbManager.recordDbVersion)
+      )
       .then(dbManager.createSearchIndex);
 
   return { fetchDb };

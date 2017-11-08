@@ -3,15 +3,16 @@ const knex = require("knex");
 const { parseInt } = require("lodash");
 const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
+const semver = require("semver");
 const debug = require("debug")("chgk-db:spider:db");
 
 const knexConfig = require("../knexfile");
 const _createSearchIndex = require("./search-index");
 
-const defaultForEmptyObj = (o, d = null) => {
-  if (!o) return d;
-  if (typeof o === "object" && !Object.keys(o).length) return d;
-  return o;
+const defaultForEmptyObj = (obj, def = null) => {
+  if (!obj) return def;
+  if (typeof obj === "object" && !Object.keys(obj).length) return def;
+  return obj;
 };
 
 const getTable = ({ db, trx, tableName }) => {
@@ -261,17 +262,19 @@ const DbManager = () => {
       });
   };
 
-  const getDbVersion = () => {
+  const getDbVersionComponents = () => {
     const schemaV = getTable({
       db,
+      trx: currentTrx,
       tableName: "knex_migrations"
     })
-      .max("id as maxId")
+      .count("id as count")
       .get(0)
-      .get("maxId");
+      .get("count");
 
     const questionsV = getTable({
       db,
+      trx: currentTrx,
       tableName: "tournaments"
     })
       .max("dbUpdatedAt as dbUpdatedAt")
@@ -279,12 +282,42 @@ const DbManager = () => {
       .get("dbUpdatedAt")
       .then(ts => dateFormat(new Date(ts), "yyyymmddHHMMss", true));
 
-    return Promise.join(
-      schemaV,
-      questionsV,
-      (schemaV, questionsV) => `${schemaV}-${questionsV}`
-    );
+    const package = require("../package.json");
+    const packageV = semver.major(package.version);
+
+    return Promise.join(schemaV, questionsV, (schemaV, questionsV) => ({
+      proto: packageV,
+      schema: schemaV,
+      dump: questionsV
+    }));
   };
+
+  const recordDbVersion = () =>
+    getDbVersionComponents().then(versions => {
+      const types = Object.keys(versions);
+      const maxLength = Math.max(...types.map(t => t.length));
+
+      return Promise.map(types, type => {
+        const value = versions[type];
+        console.log(`${type.padStart(maxLength)} version: ${value}`);
+        return upsert({
+          db,
+          trx: currentTrx,
+          tableName: "versions",
+          keyField: "type",
+          whereFields: { type },
+          dataFields: { value }
+        }).catch(e => {
+          debug("Upsert version error:", e);
+          throw e;
+        });
+      });
+    });
+
+  const getDbVersion = () =>
+    getDbVersionComponents().then(
+      ({ proto, schema, dump }) => `proto${proto}-schema${schema}-dump${dump}`
+    );
 
   return {
     upsertTournament,
@@ -292,6 +325,7 @@ const DbManager = () => {
     markAllObsolete,
     run,
     createSearchIndex,
+    recordDbVersion,
     getDbVersion
   };
 };
