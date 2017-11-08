@@ -12,7 +12,7 @@ npm run db:update && \
 ( rm -f db.bak $archive 2>/dev/null || : ) && \
 currDbVer=$(node ../get-db-version.js) && \
 echo "Prev DB version: $prevDbVer" && \
-echo "New  DB version: $ts" && \
+echo "New  DB version: $currDbVer" && \
 if [[ $currDbVer != $prevDbVer ]]; then
   archive="db-$currDbVer.tar.gz" && \
   tar -czvf $archive db.sqlite3 && \
