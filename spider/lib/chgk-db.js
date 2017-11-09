@@ -12,10 +12,17 @@ const MAX_CONNECTIONS = 10;
 
 const getUrl = n => `https://db.chgk.info/tour/${n}/xml`;
 
-const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
-  const requestPool = { maxSockets: MAX_CONNECTIONS };
+const ChgkDbManager = (
+  {
+    maxConcurrentFetches = MAX_CONCURRENT_FETCHES,
+    maxConnections = MAX_CONNECTIONS
+  } = {}
+) => {
+  const requestPool = {
+    maxSockets: maxConnections
+  };
 
-  const fetchQueue = new Queue(MAX_CONCURRENT_FETCHES, Infinity);
+  const fetchQueue = new Queue(maxConcurrentFetches, Infinity);
 
   const dbManager = DbManager();
 
@@ -80,7 +87,9 @@ const ChgkDbManager = (maxConcurrentFetches = MAX_CONCURRENT_FETCHES) => {
       )
       .then(dbManager.createSearchIndex);
 
-  return { fetchDb };
+  return {
+    fetchDb
+  };
 };
 
 exports.ChgkDbManager = ChgkDbManager;
