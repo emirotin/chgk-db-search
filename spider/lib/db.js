@@ -146,7 +146,7 @@ const DbManager = () => {
     if (!currentTrx) {
       throw new Error("Transaction is not in progress!");
     }
-    return currentTrx.commit();
+    return currentTrx.rollback();
   };
 
   const run = fn => {
