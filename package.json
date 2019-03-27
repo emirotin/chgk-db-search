@@ -19,8 +19,5 @@
   "homepage": "https://github.com/emirotin/chgk-db-search#readme",
   "devDependencies": {
     "prettier": "^1.7.4"
-  },
-  "prettier": {
-    "tabWidth": 2
   }
 }

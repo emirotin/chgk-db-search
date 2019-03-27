@@ -2,7 +2,7 @@ const path = require("path");
 const Promise = require("bluebird");
 
 const loadStemmerExt = sqlite =>
-  new Promise((resolve, reject) => {
+  Promise.fromCallback(cb => {
     const extPath = path.join(
       __dirname,
       "..",
@@ -11,22 +11,12 @@ const loadStemmerExt = sqlite =>
       process.platform,
       "fts5stemmer"
     );
-    sqlite.loadExtension(extPath, err => {
-      if (err) {
-        return reject(err);
-      }
-      resolve();
-    });
+    sqlite.loadExtension(extPath, cb);
   });
 
 const runRaw = (sqlite, query) =>
-  new Promise((resolve, reject) => {
-    sqlite.run(query, err => {
-      if (err) {
-        return reject(err);
-      }
-      resolve();
-    });
+  Promise.fromCallback(cb => {
+    sqlite.run(query, cb);
   });
 
 const questionContentsColumns = [

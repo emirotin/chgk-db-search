@@ -1,6 +1,6 @@
 {
   "name": "chgk-db-spider",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,16 +15,16 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "dateformat": "^3.0.2",
-    "debug": "^3.1.0",
-    "github-release-cli": "^0.3.0",
-    "knex": "^0.13.0",
+    "debug": "^4.1.1",
+    "github-release-cli": "^1.0.1",
+    "knex": "^0.16.0",
     "lodash": "^4.17.4",
     "promise-queue": "^2.2.3",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rimraf": "^2.6.2",
-    "semver": "^5.4.1",
-    "sqlite3": "^3.1.13",
+    "semver": "^6.0.0",
+    "sqlite3": "^4.0.6",
     "xml2json": "^0.11.0"
   }
 }

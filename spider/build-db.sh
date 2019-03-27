@@ -3,13 +3,14 @@
 dir=$(pwd)
 cd "$(dirname "$0")"
 
+mkdir -p db && \
 cd db && \
 npm run db:migrate && \
 prevDbVer=$(node ../get-db-version.js) && \
 ( rm -f db*.tar.gz db.bak 2>/dev/null || : ) && \
 ( cp db.sqlite3 db.bak 2>/dev/null || : ) && \
 npm run db:update && \
-( rm -f db.bak $archive 2>/dev/null || : ) && \
+( rm -f db.bak 2>/dev/null || : ) && \
 currDbVer=$(node ../get-db-version.js) && \
 echo "Prev DB version: $prevDbVer" && \
 echo "New  DB version: $currDbVer" && \

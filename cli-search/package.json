@@ -1,12 +1,11 @@
 {
   "name": "chgk-db-cli-search",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:download":
-      "rimraf db-new.sqlite3 && node download-db.js && mv db-new.sqlite3 db.sqlite3"
+    "db:download": "rimraf db-new.sqlite3 && node download-db.js && mv db-new.sqlite3 db.sqlite3"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +15,7 @@
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rimraf": "^2.6.2",
-    "sqlite3": "^3.1.13",
-    "tar-stream": "^1.5.4"
+    "sqlite3": "^4.0.0",
+    "tar-stream": "^2.0.1"
   }
 }
