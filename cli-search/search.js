@@ -3,6 +3,7 @@ const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 
 const dbFile = path.join(__dirname, "db.sqlite3");
+
 const db = new sqlite3.Database(dbFile);
 
 const query = process.argv
@@ -17,14 +18,16 @@ const query = process.argv
   )
   .join(" ");
 
+const { platform, arch } = process;
+const extPath = path.join(
+  __dirname,
+  "..",
+  "stemmer-sqliteext",
+  platform === "win32" && arch === "x64" ? `${platform}_${arch}` : platform,
+  "fts5stemmer"
+);
+
 db.serialize(() => {
-  const extPath = path.join(
-    __dirname,
-    "..",
-    "stemmer-sqliteext",
-    process.platform,
-    "fts5stemmer"
-  );
   db.loadExtension(extPath);
 
   db.all(
