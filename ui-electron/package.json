@@ -12,7 +12,7 @@
     "electron": "electron .",
     "start": "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
     "build": "npm run build-react && rm -rf dist/* && electron-packager . --asar --ignore='util|src|public|README.*|\\.gitignore' --out=dist",
-    "db:download": "cd db && rimraf db-new.sqlite3 && node ../util/download-db.js db-new.sqlite3 && mv db-new.sqlite3 db.sqlite3"
+    "db:download": "mkdir -p db && cd db && rimraf db-new.sqlite3 && node ../util/download-db.js db-new.sqlite3 && mv db-new.sqlite3 db.sqlite3"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
