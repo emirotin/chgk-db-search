@@ -7,12 +7,12 @@ node_js:
 before_install:
   - cd spider
   - ./fail-if-not-travis-cron.sh
-  - npm i -g npm@6
 
 script:
   - ./build-db.sh
 
 cache:
+  yarn: true
   directories:
     - "spider/node_modules"
     - "spider/db"
