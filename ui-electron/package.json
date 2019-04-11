@@ -7,7 +7,7 @@
   "scripts": {
     "start-react": "NODE_ENV=development react-scripts start",
     "build-react": "NODE_ENV=production react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
     "start": "concurrently 'BROWSER=none npm run start-react' 'wait-on http://localhost:3000/ && IS_DEV=1 npm run electron'",
@@ -15,20 +15,26 @@
     "db:download": "mkdir -p db && cd db && rimraf db-new.sqlite3 && node ../util/download-db.js db-new.sqlite3 && mv db-new.sqlite3 db.sqlite3"
   },
   "devDependencies": {
-    "concurrently": "^3.5.0",
-    "electron": "^1.7.9",
+    "concurrently": "^4.1.0",
+    "electron": "^4.1.0",
     "electron-devtools-installer": "^2.2.1",
-    "electron-packager": "^9.1.0",
+    "electron-packager": "^13.1.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-native-htmlview": "git@github.com:emirotin/react-native-htmlview.git#es5",
-    "react-native-web": "^0.1.12",
-    "react-scripts": "1.0.14",
+    "react-native-htmlview": "https://github.com/emirotin/react-native-htmlview.git#es5",
+    "react-native-web": "^0.11.2",
+    "react-scripts": "2.1.8",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "tar-stream": "^2.0.1",
-    "wait-on": "^2.0.2"
+    "wait-on": "^3.2.0"
   },
   "homepage": "./",
-  "productName": "Chgk Search"
+  "productName": "Chgk Search",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

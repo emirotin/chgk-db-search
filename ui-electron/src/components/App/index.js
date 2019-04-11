@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import Toolbar from "../Toolbar";
 import SearchResults from "../SearchResults";
 
-const PAGE_SIZE = 10;
+// const PAGE_SIZE = 10;
 
 class App extends Component {
   constructor(props) {

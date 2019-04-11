@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, /* Text, */ View } from "react-native";
 import HTMLView from "react-native-htmlview";
 
 const styles = StyleSheet.create({
@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     color: "#333"
   },
   noFlex: {
-    flexDirectio: "initial"
+    flexDirection: "initial"
   }
 });
 
