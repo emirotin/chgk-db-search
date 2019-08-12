@@ -12,12 +12,10 @@ const MAX_CONNECTIONS = 10;
 
 const getUrl = n => `https://db.chgk.info/tour/${n}/xml`;
 
-const ChgkDbManager = (
-  {
-    maxConcurrentFetches = MAX_CONCURRENT_FETCHES,
-    maxConnections = MAX_CONNECTIONS
-  } = {}
-) => {
+const ChgkDbManager = ({
+  maxConcurrentFetches = MAX_CONCURRENT_FETCHES,
+  maxConnections = MAX_CONNECTIONS
+} = {}) => {
   const requestPool = {
     maxSockets: maxConnections
   };

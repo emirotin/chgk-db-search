@@ -20,7 +20,9 @@ const SearchResults = ({
     <Text style={styles.text}>
       Результатов: {count}, с. {page} из {pagesCount}
     </Text>
-    {results.map((question, n) => <QuestionCard key={n} question={question} />)}
+    {results.map((question, n) => (
+      <QuestionCard key={n} question={question} />
+    ))}
   </View>
 );
 
