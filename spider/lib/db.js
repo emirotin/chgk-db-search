@@ -1,7 +1,6 @@
 const Promise = require("bluebird");
 const knex = require("knex");
 const { parseInt } = require("lodash");
-const sqlite = require("sqlite3");
 const dateFormat = require("dateformat");
 const semver = require("semver");
 const debug = require("debug")("chgk-db:spider:db");
@@ -17,10 +16,7 @@ const defaultForEmptyObj = (obj, def = null) => {
 
 const getTable = ({ db, trx, tableName }) => {
   const t = db(tableName);
-  if (trx) {
-    return t.transacting(trx);
-  }
-  return t;
+  return trx ? t.transacting(trx) : t;
 };
 
 const findKey = ({ db, trx, tableName, whereFields, keyField = "id" }) =>
@@ -33,14 +29,6 @@ const findKey = ({ db, trx, tableName, whereFields, keyField = "id" }) =>
     .where(whereFields)
     .get(0)
     .then(record => (record ? record[keyField] : null));
-
-const findTouramentId = ({ db, trx, whereFields }) =>
-  findKey({
-    db,
-    trx,
-    tableName: "tournaments",
-    whereFields
-  });
 
 const upsert = ({
   db,
@@ -85,16 +73,15 @@ const insertOrUpdate = ({
     })
       .insert(Object.assign({}, updateFields, extraInsertFields))
       .get(0);
-  } else {
-    return getTable({
-      db,
-      trx,
-      tableName
-    })
-      .where(keyField, key)
-      .update(updateFields)
-      .thenReturn(key);
   }
+  return getTable({
+    db,
+    trx,
+    tableName
+  })
+    .where(keyField, key)
+    .update(updateFields)
+    .thenReturn(key);
 };
 
 const tournamentType = dbType => {
@@ -142,11 +129,12 @@ const DbManager = () => {
     return currentTrx.commit();
   };
 
-  const rollback = () => {
+  const rollback = err => {
+    console.error(err);
     if (!currentTrx) {
       throw new Error("Transaction is not in progress!");
     }
-    return currentTrx.rollback();
+    return currentTrx.rollback(err);
   };
 
   const run = fn => {

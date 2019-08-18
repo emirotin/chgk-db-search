@@ -27,12 +27,17 @@ const ChgkDbManager = ({
   const realFetchUrl = n =>
     request(getUrl(n), {
       pool: requestPool
-    }).then(body =>
-      xml2json.toJson(body, {
-        object: true,
-        alternateTextNode: "$text"
-      })
-    );
+    }).then(body => {
+      try {
+        return xml2json.toJson(body, {
+          object: true,
+          alternateTextNode: "$text"
+        });
+      } catch (err) {
+        debug(err, body);
+        throw err;
+      }
+    });
 
   const fetchChildren = (data, parentId) => {
     let { tour } = data;
