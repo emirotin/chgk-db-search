@@ -29,6 +29,7 @@ const ChgkDbManager = ({
       pool: requestPool
     }).then(body => {
       try {
+        body = body.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, " ");
         return xml2json.toJson(body, {
           object: true,
           alternateTextNode: "$text"
