@@ -51,11 +51,11 @@ exports.downloadDb = targetFile =>
               return reject(new Error("Too many tar entries"));
             }
 
+            entryStream.on("error", reject);
+
             entryStream
               .pipe(fs.createWriteStream(targetFile))
               .on("close", resolve);
-
-            entryStream.on("error", reject);
           });
         })
     );
