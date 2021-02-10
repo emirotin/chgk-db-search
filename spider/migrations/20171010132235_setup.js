@@ -1,14 +1,11 @@
-exports.up = (knex, Promise) => {
+exports.up = (knex) => {
   return knex.schema
-    .createTable("tournaments", table => {
+    .createTable("tournaments", (table) => {
       table.increments("id");
       table.timestamps(true, true);
 
       table.integer("dbId");
-      table
-        .integer("parentId")
-        .references("tournaments.id")
-        .nullable();
+      table.integer("parentId").references("tournaments.id").nullable();
       table.integer("parentDbId").nullable();
       table.string("dbTextId").nullable();
       table.integer("number").nullable();
@@ -22,7 +19,7 @@ exports.up = (knex, Promise) => {
 
       table.unique(["dbId"]);
     })
-    .createTable("questions", table => {
+    .createTable("questions", (table) => {
       table.increments("id");
       table.timestamps(true, true);
 
@@ -45,6 +42,6 @@ exports.up = (knex, Promise) => {
     });
 };
 
-exports.down = (knex, Promise) => {
+exports.down = (knex) => {
   return knex.schema.dropTable("questions").dropTable("tournaments");
 };
